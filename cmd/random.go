@@ -16,36 +16,68 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
 
+	"github.com/paulfarver/dub/pkg/behindthename"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
+)
+
+var (
+	gender        string
+	usage         string
+	number        int
+	randomSurname bool
 )
 
 // randomCmd represents the random command
 var randomCmd = &cobra.Command{
 	Use:   "random",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Get random names",
+	Long:  `Get a list of random names`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("random called")
+		client := behindthename.NewClient(viper.GetString("api.token"), http.DefaultClient)
+		resp, err := client.RandomName(context.TODO(), behindthename.RandomNameParameters{
+			Gender:        gender,
+			Usage:         usage,
+			Number:        number,
+			RandomSurname: randomSurname,
+		})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		printNames(resp)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(randomCmd)
 
-	// Here you will define your flags and configuration settings.
+	randomCmd.Flags().StringVar(&gender, "gender", "", "restrict names to a specific gender")
+	randomCmd.Flags().StringVar(&usage, "usage", "", "restrict names to a specific usage such as sla for slavic")
+	randomCmd.Flags().IntVar(&number, "number", 2, "amount of names to get")
+	randomCmd.Flags().BoolVar(&randomSurname, "surname", false, "generate surnames")
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// randomCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// randomCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func printNames(resp *behindthename.RandomNameResponse) {
+	switch viper.GetString("output.format") {
+	case "json":
+		d, _ := json.Marshal(resp)
+		fmt.Println(string(d))
+	case "yaml":
+		d, _ := yaml.Marshal(resp)
+		fmt.Println(string(d))
+	case "text":
+		fallthrough
+	default:
+		for _, n := range resp.Names {
+			fmt.Println(n)
+		}
+	}
 }

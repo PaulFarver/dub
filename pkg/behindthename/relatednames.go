@@ -11,6 +11,9 @@ import (
 func (c *ClientImpl) RelatedNames(ctx context.Context, name string) ([]byte, error) {
 	req := c.r.R()
 	req.SetContext(ctx)
+
+	req.SetQueryParam("name", name)
+
 	resp, err := req.Get("/related.json")
 	if err != nil {
 		return nil, err
