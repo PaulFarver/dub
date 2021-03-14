@@ -16,9 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -85,4 +88,25 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	viper.ReadInConfig()
+}
+
+type PrinatableResponse interface {
+	GetNames() []string
+}
+
+func printNames(resp PrinatableResponse) {
+	switch viper.GetString("output.format") {
+	case "json":
+		d, _ := json.Marshal(resp)
+		fmt.Println(string(d))
+	case "yaml":
+		d, _ := yaml.Marshal(resp)
+		fmt.Println(string(d))
+	case "text":
+		fallthrough
+	default:
+		for _, n := range resp.GetNames() {
+			fmt.Println(n)
+		}
+	}
 }

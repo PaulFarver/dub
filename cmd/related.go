@@ -17,11 +17,18 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/paulfarver/dub/pkg/behindthename"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+)
+
+var (
+	relatedGender string
+	relatedUsage  string
 )
 
 // relatedCmd represents the related command
@@ -29,22 +36,24 @@ var relatedCmd = &cobra.Command{
 	Use:   "related",
 	Short: "Get related names",
 	Long:  ``,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		client := behindthename.NewClient(viper.GetString("api.token"), http.DefaultClient)
-		client.RelatedNames(context.TODO(), "")
+		resp, err := client.RelatedNames(context.TODO(), args[0], behindthename.RelatedNamesParameters{
+			Gender: relatedGender,
+			Usage:  relatedUsage,
+		})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		printNames(resp)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(relatedCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// relatedCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// relatedCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	relatedCmd.Flags().StringVar(&relatedGender, "gender", "", "restrict names to a specific gender")
+	relatedCmd.Flags().StringVar(&relatedUsage, "usage", "", "restrict names to a specific usage such as eng for english")
 }

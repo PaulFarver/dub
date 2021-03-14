@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -25,7 +24,6 @@ import (
 	"github.com/paulfarver/dub/pkg/behindthename"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -60,24 +58,7 @@ func init() {
 	rootCmd.AddCommand(randomCmd)
 
 	randomCmd.Flags().StringVar(&gender, "gender", "", "restrict names to a specific gender")
-	randomCmd.Flags().StringVar(&usage, "usage", "", "restrict names to a specific usage such as sla for slavic")
+	randomCmd.Flags().StringVar(&usage, "usage", "", "restrict names to a specific usage such as eng for english")
 	randomCmd.Flags().IntVar(&number, "number", 2, "amount of names to get")
 	randomCmd.Flags().BoolVar(&randomSurname, "surname", false, "generate surnames")
-}
-
-func printNames(resp *behindthename.RandomNameResponse) {
-	switch viper.GetString("output.format") {
-	case "json":
-		d, _ := json.Marshal(resp)
-		fmt.Println(string(d))
-	case "yaml":
-		d, _ := yaml.Marshal(resp)
-		fmt.Println(string(d))
-	case "text":
-		fallthrough
-	default:
-		for _, n := range resp.Names {
-			fmt.Println(n)
-		}
-	}
 }

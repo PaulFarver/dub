@@ -2,22 +2,51 @@ package behindthename
 
 import (
 	"context"
-	"encoding/json"
+
+	"github.com/pkg/errors"
 )
+
+type RelatedNamesParameters struct {
+	Gender string
+	Usage  string
+}
+
+type RelatedNamesResponse struct {
+	ErrorCode int      `json:"error_code,omitempty" yaml:"error_code,omitempty"`
+	Error     string   `json:"error,omitempty" yaml:"error,omitempty"`
+	Names     []string `json:"names,omitempty" yaml:"names,omitempty"`
+}
+
+func (r *RelatedNamesResponse) GetNames() []string {
+	return r.Names
+}
 
 // RelatedNames
 // This will return potential aliases for a given name.
 // https://www.behindthename.com/api/help.php
-func (c *ClientImpl) RelatedNames(ctx context.Context, name string) ([]byte, error) {
-	req := c.r.R()
-	req.SetContext(ctx)
+func (c *ClientImpl) RelatedNames(ctx context.Context, name string, params RelatedNamesParameters) (*RelatedNamesResponse, error) {
+	request := c.r.R()
+	request.SetContext(ctx)
+	request.SetResult(&RelatedNamesResponse{})
 
-	req.SetQueryParam("name", name)
+	request.SetQueryParam("name", name)
+	if params.Gender != "" {
+		request.SetQueryParam("gender", params.Gender)
+	}
+	if params.Usage != "" {
+		request.SetQueryParam("usage", params.Usage)
+	}
 
-	resp, err := req.Get("/related.json")
+	resp, err := request.Get("/related.json")
 	if err != nil {
 		return nil, err
 	}
 
-	return json.Marshal(resp.Result())
+	response := resp.Result().(*RelatedNamesResponse)
+
+	if response.ErrorCode != 0 {
+		return nil, errors.Errorf("Error response from behindthename: code=%v error=%s", response.ErrorCode, response.Error)
+	}
+
+	return response, nil
 }

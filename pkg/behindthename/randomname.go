@@ -20,6 +20,10 @@ type RandomNameResponse struct {
 	Names     []string `json:"names,omitempty" yaml:"names,omitempty"`
 }
 
+func (r *RandomNameResponse) GetNames() []string {
+	return r.Names
+}
+
 // RandomName
 // This will return a random name.
 // https://www.behindthename.com/api/help.php

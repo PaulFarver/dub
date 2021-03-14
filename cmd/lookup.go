@@ -16,8 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -25,9 +23,10 @@ import (
 var lookupCmd = &cobra.Command{
 	Use:   "lookup",
 	Short: "A brief description of your command",
-	Long: ``,
+	Long:  ``,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("lookup called")
+
 	},
 }
 
