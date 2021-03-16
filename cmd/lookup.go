@@ -16,30 +16,69 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+
+	"github.com/paulfarver/dub/pkg/behindthename"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
+)
+
+var (
+	exact bool
 )
 
 // lookupCmd represents the lookup command
 var lookupCmd = &cobra.Command{
-	Use:   "lookup",
-	Short: "A brief description of your command",
+	Use:   "lookup [name]",
+	Short: "This will return information about a given name",
 	Long:  ``,
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-
+		client := behindthename.NewClient(viper.GetString("api.token"), http.DefaultClient)
+		b, err := client.Lookup(context.Background(), args[0], behindthename.LookupParams{
+			Exact: exact,
+		})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		printLookups(*b)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(lookupCmd)
 
-	// Here you will define your flags and configuration settings.
+	lookupCmd.Flags().BoolVarP(&exact, "exact", "e", false, "whether the name supplied is exact (meaning there are no missing diacritics)")
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// lookupCmd.PersistentFlags().String("foo", "", "A help for foo")
+func printLookups(l []behindthename.LookupResponseElement) {
+	switch viper.GetString(confOutputFormat) {
+	case "json":
+		d, _ := json.Marshal(l)
+		fmt.Println(string(d))
+	case "yaml":
+		d, _ := yaml.Marshal(l)
+		fmt.Println(string(d))
+	case "text":
+		fallthrough
+	default:
+		for _, v := range l {
+			printLookup(v)
+		}
+	}
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// lookupCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func printLookup(v behindthename.LookupResponseElement) {
+	usageStrings := []string{}
+	for _, v := range v.Usages {
+		usageStrings = append(usageStrings, fmt.Sprintf("%s %s", v.UsageFull, v.UsageGender))
+	}
+	fmt.Printf("%s %s [%s]\n", v.Name, v.Gender, strings.Join(usageStrings, ", "))
 }

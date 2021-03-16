@@ -34,7 +34,7 @@ var (
 // relatedCmd represents the related command
 var relatedCmd = &cobra.Command{
 	Use:   "related",
-	Short: "Get related names",
+	Short: "This will return potential aliases for a given name",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -54,6 +54,6 @@ var relatedCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(relatedCmd)
 
-	relatedCmd.Flags().StringVar(&relatedGender, "gender", "", "restrict names to a specific gender")
-	relatedCmd.Flags().StringVar(&relatedUsage, "usage", "", "restrict names to a specific usage such as eng for english")
+	relatedCmd.Flags().StringVarP(&relatedGender, "gender", "g", "", "restrict names to a specific gender")
+	relatedCmd.Flags().StringVarP(&relatedUsage, "usage", "u", "", "restrict names to a specific usage such as eng for english")
 }

@@ -21,8 +21,7 @@ func (r *RelatedNamesResponse) GetNames() []string {
 	return r.Names
 }
 
-// RelatedNames
-// This will return potential aliases for a given name.
+// RelatedNames will return potential aliases for a given name.
 // https://www.behindthename.com/api/help.php
 func (c *ClientImpl) RelatedNames(ctx context.Context, name string, params RelatedNamesParameters) (*RelatedNamesResponse, error) {
 	request := c.r.R()

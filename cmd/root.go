@@ -36,16 +36,8 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "dub",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "A quick cli to call the behindthename api",
+	Long: ``,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -56,13 +48,12 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.dub.yaml)")
-	rootCmd.PersistentFlags().String("format", "", "Output format")
-
 	viper.SetDefault(confOutputFormat, "text")
 
-	viper.BindPFlag(confOutputFormat, rootCmd.PersistentFlags().Lookup("format"))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.dub.yaml)")
+	rootCmd.PersistentFlags().StringP("output", "o", viper.GetString(confOutputFormat), "Output format")
+
+	viper.BindPFlag(confOutputFormat, rootCmd.PersistentFlags().Lookup("output"))
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -95,7 +86,7 @@ type PrinatableResponse interface {
 }
 
 func printNames(resp PrinatableResponse) {
-	switch viper.GetString("output.format") {
+	switch viper.GetString(confOutputFormat) {
 	case "json":
 		d, _ := json.Marshal(resp)
 		fmt.Println(string(d))

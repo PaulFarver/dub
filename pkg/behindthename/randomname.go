@@ -24,8 +24,7 @@ func (r *RandomNameResponse) GetNames() []string {
 	return r.Names
 }
 
-// RandomName
-// This will return a random name.
+// RandomName will return a random name.
 // https://www.behindthename.com/api/help.php
 func (c *ClientImpl) RandomName(ctx context.Context, params RandomNameParameters) (*RandomNameResponse, error) {
 	request := c.r.R()

@@ -36,7 +36,7 @@ var (
 // randomCmd represents the random command
 var randomCmd = &cobra.Command{
 	Use:   "random",
-	Short: "Get random names",
+	Short: "This will return random names",
 	Long:  `Get a list of random names`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := behindthename.NewClient(viper.GetString("api.token"), http.DefaultClient)
@@ -57,8 +57,8 @@ var randomCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(randomCmd)
 
-	randomCmd.Flags().StringVar(&gender, "gender", "", "restrict names to a specific gender")
-	randomCmd.Flags().StringVar(&usage, "usage", "", "restrict names to a specific usage such as eng for english")
-	randomCmd.Flags().IntVar(&number, "number", 2, "amount of names to get")
-	randomCmd.Flags().BoolVar(&randomSurname, "surname", false, "generate surnames")
+	randomCmd.Flags().StringVarP(&gender, "gender", "g", "", "restrict names to a specific gender")
+	randomCmd.Flags().StringVarP(&usage, "usage", "u", "", "restrict names to a specific usage such as eng for english")
+	randomCmd.Flags().IntVarP(&number, "number", "n", 2, "amount of names to get")
+	randomCmd.Flags().BoolVarP(&randomSurname, "surname", "s", false, "generate surnames")
 }
